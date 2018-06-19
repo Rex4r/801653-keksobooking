@@ -17,7 +17,9 @@ var generateData = function () {
     return currentFeatures;
   };
   var generatePhotos = function (photosList) {
-    return photosList.sort(function() {return 0.5 - Math.random()});
+    return photosList.sort(function () {
+      return 0.5 - Math.random();
+    });
   };
   for (var i = 0; i < 8; i++) {
     var coordinateX = Math.round(Math.random() * mapWidth);
