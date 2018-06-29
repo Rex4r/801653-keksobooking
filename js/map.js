@@ -1,12 +1,11 @@
 'use strict';
 var mapBlock = document.querySelector('.map');
-var mapPinMain = document.querySelector('.map__pin--main');
+var mapPinsBlock = document.querySelector('.map__pins');
+var mapPinMain = mapPinsBlock.querySelector('.map__pin--main');
 var adFormBlock = document.querySelector('.ad-form');
 var adFormFieldsets = adFormBlock.querySelectorAll('fieldset');
 var renderAds = function () {
-  var mapPinsBlock = document.querySelector('.map__pins');
   var pinTemplate = document.querySelector('template').content.querySelector('.map__pin');
-  var mapBlock = document.querySelector('.map');
   var cardTemplate = document.querySelector('template').content.querySelector('.map__card');
   var adsData = (function () {
     var ads = [];
