@@ -176,7 +176,7 @@
   mapPinsBlock.appendChild(pins);
   mapBlock.insertBefore(cards, document.querySelector('.map__filters-container'));
 
-  pins = mapPinsBlock.querySelectorAll('.map__pin');
+  pins = mapPinsBlock.querySelectorAll('.map__pin.hidden');
   cards = mapBlock.querySelectorAll('.map__card');
   addListeners(pins, cards);
 
