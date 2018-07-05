@@ -136,7 +136,7 @@
     }
   };
   var setAddress = function (x, y) {
-    adFormBlock.querySelector('#address').value = x + ', ' + y;
+    adFormBlock.querySelector('#address').value = Math.round(x) + ', ' + Math.round(y);
   };
   var addListeners = function (pins, cards) {
     for (var i = 0; i < pins.length; i++) {
@@ -182,21 +182,80 @@
 
   toggleFieldsetsEnabled(adFormFieldsets, false);
 
-  mapPinMain.addEventListener('mouseup', function () {
-    var coordX = Math.round(mapPinMain.offsetLeft + mapPinMain.offsetWidth / 2);
-    var coordY = Math.round(mapPinMain.offsetTop + mapPinMain.offsetHeight / 2);
+  mapPinMain.addEventListener('mousedown', function (evt) {
+    var dragAndDrop = function () {
+      evt.preventDefault();
 
-    mapBlock.classList.remove('map--faded');
-    adFormBlock.classList.remove('ad-form--disabled');
-    toggleFieldsetsEnabled(adFormFieldsets, true);
-    setAddress(coordX, coordY);
+      var maxX = mapBlock.offsetWidth - mapPinMain.offsetWidth;
+
+      var pinPointShift = {
+        'x': mapPinMain.offsetWidth / 2,
+        'y': mapPinMain.offsetHeight + 16
+      };
+
+      var startCoords = {
+        x: evt.clientX,
+        y: evt.clientY
+      };
+
+      var onMouseMove = function (moveEvt) {
+        moveEvt.preventDefault();
+
+        var shift = {
+          x: startCoords.x - moveEvt.clientX,
+          y: startCoords.y - moveEvt.clientY
+        };
+
+        var newCoords = {
+          'y': mapPinMain.offsetTop - shift.y,
+          'x': mapPinMain.offsetLeft - shift.x
+        };
+
+        if (newCoords.x < 0 || newCoords.x > maxX) {
+          newCoords.x = newCoords.x < 0 ? 0 : newCoords.x;
+          newCoords.x = newCoords.x > maxX ? maxX : newCoords.x;
+        }
+        if (newCoords.y < 130 || newCoords.y > 630) {
+          newCoords.y = newCoords.y < 130 ? 130 : newCoords.y;
+          newCoords.y = newCoords.y > 630 ? 630 : newCoords.y;
+        }
+
+        mapPinMain.style.top = newCoords.y + 'px';
+        mapPinMain.style.left = newCoords.x + 'px';
+
+        setAddress(newCoords.x + pinPointShift.x, newCoords.y + pinPointShift.y);
+
+        startCoords = {
+          x: moveEvt.clientX,
+          y: moveEvt.clientY
+        };
+      };
+
+      var onMouseUp = function (upEvt) {
+        upEvt.preventDefault();
+
+        setAddress(mapPinMain.offsetLeft + pinPointShift.x, mapPinMain.offsetTop + pinPointShift.y);
+
+        mapBlock.removeEventListener('mousemove', onMouseMove);
+        mapBlock.removeEventListener('mouseup', onMouseUp);
+      };
+
+      mapBlock.addEventListener('mousemove', onMouseMove);
+      mapBlock.addEventListener('mouseup', onMouseUp);
+    };
+
+    dragAndDrop();
     if (!mapIsActive) {
+      mapBlock.classList.remove('map--faded');
+      adFormBlock.classList.remove('ad-form--disabled');
+      toggleFieldsetsEnabled(adFormFieldsets, true);
       for (var i = 0; i < pins.length; i++) {
         pins[i].classList.remove('hidden');
       }
       mapIsActive = true;
     }
   });
+
   (function validation() {
     var form = document.querySelector('.ad-form');
     var inputPrice = form.querySelector('#price');
@@ -218,6 +277,10 @@
       '100': ['0']
     };
     var DEFAULT_ATTRS = {
+      'mapPinMain': {
+        'x': 570,
+        'y': 375
+      },
       'price': {
         'min': inputPrice.min,
         'placeholder': inputPrice.placeholder
@@ -254,6 +317,10 @@
         cards[i].classList.add('hidden');
       }
     };
+    var mapPinMainReset = function () {
+      mapPinMain.style.top = DEFAULT_ATTRS.mapPinMain.y + 'px';
+      mapPinMain.style.left = DEFAULT_ATTRS.mapPinMain.x + 'px';
+    };
     var formReset = function () {
       adFormBlock.classList.add('ad-form--disabled');
       inputPrice.min = DEFAULT_ATTRS.price.min;
@@ -262,6 +329,7 @@
     };
     var onResetClick = function () {
       mapReset();
+      mapPinMainReset();
       formReset();
       mapIsActive = false;
     };
