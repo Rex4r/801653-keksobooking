@@ -1,6 +1,6 @@
 'use strict';
 
-(function validation() {
+(function () {
   var form = document.querySelector('.ad-form');
   var inputPrice = form.querySelector('#price');
   var inputTimeIn = form.querySelector('#timein');
@@ -55,18 +55,18 @@
     }
   };
   var mapReset = function () {
-    document.map.mapBlock.classList.add('map--faded');
-    for (var i = 0; i < document.map.pins.length; i++) {
-      document.map.pins[i].classList.add('hidden');
-      document.map.cards[i].classList.add('hidden');
+    window.map.mapBlock.classList.add('map--faded');
+    for (var i = 0; i < window.map.pins.length; i++) {
+      window.map.pins[i].classList.add('hidden');
+      window.map.cards[i].classList.add('hidden');
     }
   };
   var mapPinMainReset = function () {
-    document.map.mapPinMain.style.top = DEFAULT_ATTRS.mapPinMain.y + 'px';
-    document.map.mapPinMain.style.left = DEFAULT_ATTRS.mapPinMain.x + 'px';
+    window.map.mapPinMain.style.top = DEFAULT_ATTRS.mapPinMain.y + 'px';
+    window.map.mapPinMain.style.left = DEFAULT_ATTRS.mapPinMain.x + 'px';
   };
   var formReset = function () {
-    document.map.adFormBlock.classList.add('ad-form--disabled');
+    window.map.adFormBlock.classList.add('ad-form--disabled');
     inputPrice.min = DEFAULT_ATTRS.price.min;
     inputPrice.placeholder = DEFAULT_ATTRS.price.placeholder;
     onRoomNumberChange(DEFAULT_ATTRS.room_number);
@@ -75,7 +75,56 @@
     mapReset();
     mapPinMainReset();
     formReset();
-    document.map.mapIsActive = false;
+    window.map.mapIsActive = false;
+  };
+  var onFormSubmit = function () {
+    var formData = new FormData(form);
+    var onSuccess = function () {
+      var openPopup = function () {
+        document.querySelector('.success').classList.remove('hidden');
+        document.addEventListener('click', onClick);
+        document.addEventListener('keydown', onEscPress);
+      };
+      var closePopup = function () {
+        document.querySelector('.success').classList.add('hidden');
+        document.removeEventListener('click', onClick);
+        document.removeEventListener('keydown', onEscPress);
+      };
+      var onClick = function () {
+        closePopup();
+      };
+      var onEscPress = function (evt) {
+        if (evt.keyCode === 27) {
+          closePopup();
+        }
+      };
+      resetButton.click();
+      openPopup();
+    };
+    var onError = function (errorText) {
+      var errorElement = document.createElement('div');
+      errorElement.innerText = errorText;
+      errorElement.classList.add('error');
+      errorElement.style.fontSize = '22px';
+      errorElement.style.color = 'red';
+      errorElement.style.paddingBottom = '30px';
+
+      var onClick = function (evt) {
+        if (evt.target.classList.contains('ad-form__reset') || evt.target.classList.contains('ad-form__submit')) {
+          removeError();
+          window.map.adFormBlock.removeEventListener('click', onClick);
+        }
+      };
+      var removeError = function () {
+        var error = window.map.adFormBlock.querySelector('.error');
+        window.map.adFormBlock.querySelector('.ad-form__element--submit').removeChild(error);
+      };
+
+      window.map.adFormBlock.querySelector('.ad-form__element--submit').insertBefore(errorElement, document.querySelector('.ad-form__submit'));
+      window.map.adFormBlock.addEventListener('click', onClick);
+    };
+
+    window.document.backend.sendData(formData, onSuccess, onError);
   };
 
   var HANDLERS = {
@@ -92,5 +141,10 @@
   });
   resetButton.addEventListener('click', function () {
     onResetClick();
+  });
+  form.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+
+    onFormSubmit();
   });
 })();
