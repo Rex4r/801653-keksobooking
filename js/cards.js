@@ -3,7 +3,7 @@
 (function () {
   var cardTemplate = document.querySelector('template').content.querySelector('.map__card');
 
-  var generateAdCard = function (data) {
+  var generateAdCard = function (data, num) {
     var card = cardTemplate.cloneNode(true);
     var TYPE = {
       'flat': 'Квартира',
@@ -14,7 +14,7 @@
     var photosBlock = card.querySelector('.popup__photos');
     var photoTemplate = photosBlock.querySelector('.popup__photo');
 
-    card.dataset.id = data.id;
+    card.dataset.id = num;
     card.classList.add('hidden');
     card.querySelector('.popup__title').textContent = data.offer.title;
     card.querySelector('.popup__text--address').textContent = data.offer.address;
@@ -36,15 +36,16 @@
 
     return card;
   };
+
   var generateAdCards = function (data) {
     var cards = document.createDocumentFragment();
     for (var i = 0; i < data.length; i++) {
-      var card = generateAdCard(data[i]);
+      var card = generateAdCard(data[i], i);
       cards.appendChild(card);
     }
 
     return cards;
   };
 
-  window.cards = generateAdCards(window.data);
+  window.cards = generateAdCards;
 })();
