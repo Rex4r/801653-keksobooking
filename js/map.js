@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+  var PINS_COUNT = 5;
   window.map = {
     'mapIsActive': false,
     'mapBlock': document.querySelector('.map'),
@@ -56,8 +57,9 @@
     }
   };
   var generateMapContent = function (data) {
-    var pins = window.pins(data);
-    var cards = window.cards(data);
+    window.map.adsData = data;
+    var pins = window.pins.generatePins(window.map.adsData, PINS_COUNT);
+    var cards = window.cards(window.map.adsData);
     window.map.mapPinsBlock.appendChild(pins);
     window.map.mapBlock.insertBefore(cards, document.querySelector('.map__filters-container'));
 
@@ -149,11 +151,37 @@
       window.map.adFormBlock.classList.remove('ad-form--disabled');
       toggleFieldsetsEnabled(window.map.adFormFieldsets, true);
       if (typeof window.map.pins !== 'undefined') {
-        for (var i = 0; i < window.map.pins.length; i++) {
+        var count = PINS_COUNT < window.map.pins.length ? PINS_COUNT : window.map.pins.length;
+        for (var i = 0; i < count; i++) {
           window.map.pins[i].classList.remove('hidden');
         }
       }
       window.map.mapIsActive = true;
     }
+  });
+
+  var filterBlock = document.querySelector('.map__filters');
+  var getFilter = function () {
+    var newFilterData = {
+      'type': filterBlock.querySelector('#housing-type').value,
+      'price': filterBlock.querySelector('#housing-price').value,
+      'rooms': filterBlock.querySelector('#housing-rooms').value,
+      'guests': filterBlock.querySelector('#housing-guests').value,
+      'features': []
+    };
+    var featuresCheckboxs = filterBlock.querySelectorAll('.map__checkbox');
+    featuresCheckboxs.forEach(function (checkbox) {
+      if (checkbox.checked) {
+        newFilterData.features.push(checkbox.value);
+      }
+    });
+    return newFilterData;
+  };
+
+  filterBlock.addEventListener('change', function () {
+    window.debounce(function () {
+      var filterData = getFilter();
+      window.pins.filterPins(filterData, PINS_COUNT);
+    });
   });
 })();

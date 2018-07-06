@@ -17,7 +17,7 @@
     return pin;
   };
 
-  var generatePins = function (data) {
+  var generatePins = function (data, count) {
     var mapPins = document.createDocumentFragment();
     for (var i = 0; i < data.length; i++) {
       var pin = generatePin(data[i], i);
@@ -25,7 +25,8 @@
     }
     if (window.map.mapIsActive === true) {
       var pins = mapPins.querySelectorAll('.map__pin');
-      for (i = 0; i < pins.length; i++) {
+      count = count < pins.length ? count : pins.length;
+      for (i = 0; i < count; i++) {
         pins[i].classList.remove('hidden');
       }
     }
@@ -33,6 +34,60 @@
     return mapPins;
   };
 
-  window.pins = generatePins;
+  var filterPins = function (filterData, maxCount) {
+    var data = window.map.adsData;
+    data.forEach(function (item, i) {
+      item.id = i;
+    });
+    var newData = data.filter(function (ad) {
+      var checkPrice = function (filtePriceGrop, adPrice) {
+        var PriceGroup = {
+          'high': adPrice >= 50000,
+          'middle': adPrice >= 10000 && adPrice < 50000,
+          'low': adPrice < 10000
+        };
+        return PriceGroup[filtePriceGrop];
+      };
+      var checkFeatures = function (filterFeatures, adFeatures) {
+        var correct = true;
+        filterFeatures.forEach(function (feature) {
+          if (correct) {
+            correct = adFeatures.includes(feature);
+          }
+        });
+        return correct;
+      };
+      var correct = {
+        type: filterData.type === 'any' || filterData.type === ad.offer.type,
+        price: filterData.price === 'any' || checkPrice(filterData.price, ad.offer.price),
+        rooms: filterData.rooms === 'any' || +filterData.rooms === ad.offer.rooms,
+        guests: filterData.guests === 'any' || +filterData.guests === ad.offer.guests,
+        features: filterData.features === [] || checkFeatures(filterData.features, ad.offer.features)
+      };
+      return correct.type && correct.price && correct.rooms && correct.guests && correct.features;
+    });
+    var correctIds = newData.map(function (ad) {
+      return ad.id;
+    }).slice(0, maxCount);
+    var updatePins = function (ids) {
+      window.map.cards.forEach(function (card) {
+        card.classList.add('hidden');
+      });
+      window.map.pins.forEach(function (pin) {
+        if (ids.includes(+pin.dataset.id)) {
+          pin.classList.remove('hidden');
+        } else {
+          pin.classList.add('hidden');
+        }
+      });
+    };
+
+    updatePins(correctIds);
+  };
+
+  window.pins = {
+    'generatePins': generatePins,
+    'filterPins': filterPins
+  };
 })();
 
