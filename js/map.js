@@ -2,6 +2,7 @@
 
 (function () {
   var PINS_COUNT = 5;
+  var activeCardId;
   window.map = {
     'mapIsActive': false,
     'mapBlock': document.querySelector('.map'),
@@ -37,25 +38,31 @@
       }
     });
   };
+  var onEscPress = function (evt) {
+    if (window.utils.isEscKeyCode(evt.keyCode)) {
+      closePopup();
+    }
+  };
+  var closePopup = function () {
+    if (activeCardId !== undefined) {
+      var pinActive = window.map.mapBlock.querySelector('.map__pin--active');
+      if (pinActive) {
+        pinActive.classList.remove('map__pin--active');
+      }
+      window.map.mapBlock.querySelector('.map__card[data-id="' + activeCardId + '"]').classList.add('hidden');
+      document.removeEventListener('keydown', onEscPress);
+    }
+  };
   var openPopup = function (id) {
     if (id !== undefined) {
-      var cards = window.map.mapBlock.querySelectorAll('.map__card');
-      var pins = window.map.mapBlock.querySelectorAll('.map__pin');
-
-      for (var i = 0; i < cards.length; i++) {
-        cards[i].classList.add('hidden');
-        pins[i + 1].classList.remove('map__pin--active');
-      }
+      closePopup();
+      document.addEventListener('keydown', onEscPress);
       window.map.mapBlock.querySelector('.map__card[data-id="' + id + '"]').classList.remove('hidden');
       window.map.mapBlock.querySelector('.map__pin[data-id="' + id + '"]').classList.add('map__pin--active');
+      activeCardId = id;
     }
   };
-  var closePopup = function (id) {
-    if (id !== undefined) {
-      window.map.mapBlock.querySelector('.map__card[data-id="' + id + '"]').classList.add('hidden');
-      window.map.mapBlock.querySelector('.map__pin[data-id="' + id + '"]').classList.remove('map__pin--active');
-    }
-  };
+
   var generateMapContent = function (data) {
     window.map.adsData = data;
     var pins = window.pins.generatePins(window.map.adsData, PINS_COUNT);
@@ -69,12 +76,12 @@
   };
 
   var onError = function (errorText) {
-    var errorElement = document.createElement('div');
-    errorElement.innerText = errorText;
-    errorElement.classList.add('error');
-    errorElement.style.fontSize = '18px';
-    errorElement.style.color = 'red';
-    errorElement.style.textAlign = 'center';
+    var styles = {
+      'fontSize': '18px',
+      'color': 'red',
+      'textAlign': 'center'
+    };
+    var errorElement = window.utils.generateErrorBlock(errorText, styles);
 
     document.querySelector('.promo').appendChild(errorElement);
   };

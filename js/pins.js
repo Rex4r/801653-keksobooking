@@ -41,10 +41,14 @@
     });
     var newData = data.filter(function (ad) {
       var checkPrice = function (filtePriceGrop, adPrice) {
+        var Price = {
+          'MIN_HIGH': 50000,
+          'MIN_MIDDLE': 10000
+        };
         var PriceGroup = {
-          'high': adPrice >= 50000,
-          'middle': adPrice >= 10000 && adPrice < 50000,
-          'low': adPrice < 10000
+          'high': adPrice >= Price.MIN_HIGH,
+          'middle': adPrice >= Price.MIN_MIDDLE && adPrice < Price.MIN_HIGH,
+          'low': adPrice < Price.MIN_MIDDLE
         };
         return PriceGroup[filtePriceGrop];
       };

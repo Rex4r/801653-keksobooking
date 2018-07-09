@@ -94,7 +94,7 @@
         closePopup();
       };
       var onEscPress = function (evt) {
-        if (evt.keyCode === 27) {
+        if (window.utils.isEscKeyCode(evt.keyCode)) {
           closePopup();
         }
       };
@@ -102,12 +102,12 @@
       openPopup();
     };
     var onError = function (errorText) {
-      var errorElement = document.createElement('div');
-      errorElement.innerText = errorText;
-      errorElement.classList.add('error');
-      errorElement.style.fontSize = '22px';
-      errorElement.style.color = 'red';
-      errorElement.style.paddingBottom = '30px';
+      var styles = {
+        'fontSize': '22px',
+        'color': 'red',
+        'paddingBottom': '30px'
+      };
+      var errorElement = window.utils.generateErrorBlock(errorText, styles);
 
       var onClick = function (evt) {
         if (evt.target.classList.contains('ad-form__reset') || evt.target.classList.contains('ad-form__submit')) {

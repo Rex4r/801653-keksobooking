@@ -21,7 +21,7 @@
           error = 'Ничего не найдено';
           break;
         default:
-          error = 'Cтатус ответа: : ' + xhr.status + ' ' + xhr.statusText;
+          error = 'Cтатус ответа: ' + xhr.status + ' ' + xhr.statusText;
       }
 
       if (error) {
