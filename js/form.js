@@ -7,6 +7,10 @@
   var inputTimeOut = form.querySelector('#timeout');
   var inputCapacity = form.querySelector('#capacity');
   var inputCapacityOptions = inputCapacity.querySelectorAll('option');
+  var inputAvatar = form.querySelector('#avatar');
+  var previewBlockAvatar = form.querySelector('.ad-form-header__preview');
+  var inputImages = form.querySelector('#images');
+  var previewBlockImages = form.querySelector('.ad-form__photo-container');
   var resetButton = form.querySelector('.ad-form__reset');
   var MIN_PRICES_PER_TYPE = {
     'bungalo': '0',
@@ -25,6 +29,7 @@
       'x': 570,
       'y': 375
     },
+    'avatarSrc': previewBlockAvatar.querySelector('img').src,
     'price': {
       'min': inputPrice.min,
       'placeholder': inputPrice.placeholder
@@ -54,6 +59,51 @@
       }
     }
   };
+  var generatePreviewImage = function (input, previewBlock, needNewImageTag) {
+    var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+
+    var file = input.files[0];
+    var fileName = file.name.toLowerCase();
+
+    var matches = FILE_TYPES.some(function (it) {
+      return fileName.endsWith(it);
+    });
+
+    if (matches) {
+      var reader = new FileReader();
+
+      reader.addEventListener('load', function () {
+        if (needNewImageTag) {
+          var div = previewBlock.querySelector('.ad-form__photo');
+          var img = document.createElement('img');
+          var styles = {
+            'width': '45px',
+            'height': '40px',
+            'margin': '15px 12px'
+          };
+
+          if (div.querySelector('img') !== null) {
+            div = document.createElement('div');
+            div.classList.add('ad-form__photo');
+          }
+          img.src = reader.result;
+          window.utils.setStyles(img, styles);
+          div.appendChild(img);
+          previewBlock.appendChild(div);
+        } else {
+          previewBlock.querySelector('img').src = reader.result;
+        }
+      });
+
+      reader.readAsDataURL(file);
+    }
+  };
+  var onAvatarChange = function () {
+    generatePreviewImage(inputAvatar, previewBlockAvatar, false);
+  };
+  var onImagesChange = function () {
+    generatePreviewImage(inputImages, previewBlockImages, true);
+  };
   var mapReset = function () {
     window.map.mapBlock.classList.add('map--faded');
     for (var i = 0; i < window.map.pins.length; i++) {
@@ -66,9 +116,19 @@
     window.map.mapPinMain.style.left = DEFAULT_ATTRS.mapPinMain.x + 'px';
   };
   var formReset = function () {
+    var photos = previewBlockImages.querySelectorAll('.ad-form__photo');
+
     window.map.adFormBlock.classList.add('ad-form--disabled');
     inputPrice.min = DEFAULT_ATTRS.price.min;
     inputPrice.placeholder = DEFAULT_ATTRS.price.placeholder;
+    previewBlockAvatar.querySelector('img').src = DEFAULT_ATTRS.avatarSrc;
+    photos.forEach(function (photo, i) {
+      if (i === 0) {
+        photo.querySelector('img').remove();
+      } else {
+        photo.remove();
+      }
+    });
     onRoomNumberChange(DEFAULT_ATTRS.room_number);
   };
   var onResetClick = function () {
@@ -124,14 +184,16 @@
       window.map.adFormBlock.addEventListener('click', onClick);
     };
 
-    window.document.backend.sendData(formData, onSuccess, onError);
+    window.backend.sendData(formData, onSuccess, onError);
   };
 
   var HANDLERS = {
     'type': onTypeChange,
     'timein': onInputTimeInChange,
     'timeout': onInputTimeOutChange,
-    'room_number': onRoomNumberChange
+    'room_number': onRoomNumberChange,
+    'avatar': onAvatarChange,
+    'images': onImagesChange
   };
   form.addEventListener('change', function (evt) {
     var id = evt.target.id;

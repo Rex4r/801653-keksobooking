@@ -1,15 +1,18 @@
 'use strict';
 
 (function () {
+  var setStyles = function (element, styles) {
+    for (var style in styles) {
+      if (styles.hasOwnProperty(style)) {
+        element.style[style] = styles[style];
+      }
+    }
+  };
   var generateErrorBlock = function (text, styles) {
     var errorElement = document.createElement('div');
     errorElement.innerText = text;
     errorElement.classList.add('error');
-    for (var style in styles) {
-      if (styles.hasOwnProperty(style)) {
-        errorElement.style[style] = styles[style];
-      }
-    }
+    setStyles(errorElement, styles);
 
     return errorElement;
   };
@@ -19,6 +22,7 @@
 
   window.utils = {
     'generateErrorBlock': generateErrorBlock,
-    'isEscKeyCode': isEscKeyCode
+    'isEscKeyCode': isEscKeyCode,
+    'setStyles': setStyles
   };
 })();

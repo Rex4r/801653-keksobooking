@@ -58,7 +58,7 @@
     xhr.send(data);
   };
 
-  window.document.backend = {
+  window.backend = {
     'getData': getData,
     'sendData': sendData
   };

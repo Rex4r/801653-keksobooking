@@ -86,7 +86,7 @@
     document.querySelector('.promo').appendChild(errorElement);
   };
 
-  window.document.backend.getData(generateMapContent, onError);
+  window.backend.getData(generateMapContent, onError);
 
   toggleFieldsetsEnabled(window.map.adFormFieldsets, false);
 
